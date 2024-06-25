@@ -6,7 +6,6 @@ export default function NavBar() {
       <Container>
         <MenuItem header>
           <img src="/logo.png" alt="logo" />
-          Re-vents
         </MenuItem>
         <MenuItem name="Events" />
         <MenuItem>
