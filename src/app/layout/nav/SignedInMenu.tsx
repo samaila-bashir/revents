@@ -1,22 +1,23 @@
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown, Menu, Image } from "semantic-ui-react";
+import { signOut } from "../../store/slices/auth";
+import { RootState } from "../../store/store";
 
-type Props = {
-  setAuth: (value: boolean) => void;
-};
-
-export default function SignedInMenu({ setAuth }: Props) {
+export default function SignedInMenu() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state: RootState) => state.auth.currentUser);
 
   const handleSignOut = () => {
-    setAuth(false);
+    dispatch(signOut());
     navigate("/");
   };
 
   return (
     <Menu.Item position="right">
       <Image avatar spaced="right" src="/user.png" />
-      <Dropdown pointing="top left" text="Bob">
+      <Dropdown pointing="top left" text={currentUser?.email}>
         <Dropdown.Menu>
           <Dropdown.Item
             as={Link}
