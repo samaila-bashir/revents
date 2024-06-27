@@ -4,13 +4,17 @@ import { Button, Form, Header, Message, Segment } from "semantic-ui-react";
 import { RootState } from "../../../app/store/store";
 import { createEvent, updateEvent } from "../../../app/store/slices/events";
 import { createId } from "@paralleldrive/cuid2";
-import { FieldValues, useForm } from "react-hook-form";
+import { Controller, FieldValues, useForm } from "react-hook-form";
 import { categoryData } from "./categoryOptions";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
 
 export default function EventForm() {
   const {
     register,
     handleSubmit,
+    control,
+    setValue,
     formState: { errors, isValid, isSubmitting },
   } = useForm({ mode: "onTouched" });
   const dispatch = useDispatch();
@@ -114,7 +118,33 @@ export default function EventForm() {
           )}
         </Form.Field>
 
-        <Form.Field error={errors.date}>
+        <Form.Field>
+          <Controller
+            name="date"
+            control={control}
+            rules={{ required: true }}
+            defaultValue={(event && new Date(event.date)) || null}
+            render={({ field }) => (
+              <DatePicker
+                selected={field.value}
+                onChange={(value) =>
+                  setValue("date", value, { shouldValidate: true })
+                }
+                showTimeSelect
+                timeCaption="time"
+                dateFormat="MMM d, yyyy h:mm aa"
+                placeholderText="Event date and time"
+              />
+            )}
+          />
+          {errors.date && (
+            <Message negative>
+              <p>Date is required</p>
+            </Message>
+          )}
+        </Form.Field>
+
+        {/* <Form.Field error={errors.date}>
           <input
             type="date"
             placeholder="Date"
@@ -126,7 +156,7 @@ export default function EventForm() {
               <p>Date is required</p>
             </Message>
           )}
-        </Form.Field>
+        </Form.Field> */}
 
         <Button
           disabled={!isValid}
