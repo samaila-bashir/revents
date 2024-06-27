@@ -8,6 +8,7 @@ import { Controller, FieldValues, useForm } from "react-hook-form";
 import { categoryData } from "./categoryOptions";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
+import { AppEvent } from "../../../app/types/events";
 
 export default function EventForm() {
   const {
@@ -25,20 +26,20 @@ export default function EventForm() {
   const navigate = useNavigate();
 
   const handleFormSubmit = (data: FieldValues) => {
-    console.log(data);
-    // id = id ?? createId();
-    // event
-    //   ? dispatch(updateEvent({ ...event, ...formValues }))
-    //   : dispatch(
-    //       createEvent({
-    //         ...formValues,
-    //         id,
-    //         hostedBy: "Chatto",
-    //         attendees: [],
-    //         hostPhotoURL: "",
-    //       })
-    //     );
-    // navigate(`/events/${id}`);
+    id = id ?? createId();
+    event
+      ? dispatch(updateEvent({ ...event, ...data, date: data.date.toString() }))
+      : dispatch(
+          createEvent({
+            ...(data as AppEvent),
+            id,
+            hostedBy: "Chatto",
+            attendees: [],
+            hostPhotoURL: "",
+            date: data.date.toString(),
+          })
+        );
+    navigate(`/events/${id}`);
   };
 
   return (
