@@ -1,12 +1,18 @@
-import { ChangeEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Header, Segment } from "semantic-ui-react";
+import { Button, Form, Header, Message, Segment } from "semantic-ui-react";
 import { RootState } from "../../../app/store/store";
 import { createEvent, updateEvent } from "../../../app/store/slices/events";
 import { createId } from "@paralleldrive/cuid2";
+import { FieldValues, useForm } from "react-hook-form";
+import { categoryData } from "./categoryOptions";
 
 export default function EventForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm({ mode: "onTouched" });
   const dispatch = useDispatch();
   let { id } = useParams();
   const event = useSelector((state: RootState) =>
@@ -14,103 +20,129 @@ export default function EventForm() {
   );
   const navigate = useNavigate();
 
-  const initialValues = event ?? {
-    title: "",
-    category: "",
-    description: "",
-    city: "",
-    venue: "",
-    date: "",
-  };
-
-  const [formValues, setFormValues] = useState(initialValues);
-
-  const handleFormSubmit = () => {
-    // e.preventDefault();
-    id = id ?? createId();
-
-    event
-      ? dispatch(updateEvent({ ...event, ...formValues }))
-      : dispatch(
-          createEvent({
-            ...formValues,
-            id,
-            hostedBy: "Chatto",
-            attendees: [],
-            hostPhotoURL: "",
-          })
-        );
-
-    navigate(`/events/${id}`);
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const newFormValues = { ...formValues, [name]: value };
-    setFormValues(newFormValues);
+  const handleFormSubmit = (data: FieldValues) => {
+    console.log(data);
+    // id = id ?? createId();
+    // event
+    //   ? dispatch(updateEvent({ ...event, ...formValues }))
+    //   : dispatch(
+    //       createEvent({
+    //         ...formValues,
+    //         id,
+    //         hostedBy: "Chatto",
+    //         attendees: [],
+    //         hostPhotoURL: "",
+    //       })
+    //     );
+    // navigate(`/events/${id}`);
   };
 
   return (
     <Segment clearing>
-      <Header content={event ? "Update Event" : "Create Event"} />
-      <Form onSubmit={handleFormSubmit}>
-        <Form.Field>
+      <Header content="Event details" sub color="teal" />
+      <Form onSubmit={handleSubmit(handleFormSubmit)}>
+        <Form.Field error={errors.title}>
           <input
-            type="text"
-            name="title"
-            value={formValues.title}
             placeholder="Event title"
-            onChange={handleInputChange}
+            defaultValue={event?.title || ""}
+            {...register("title", { required: true })}
           />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            name="category"
-            value={formValues.category}
-            placeholder="category"
-            onChange={handleInputChange}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            name="description"
-            value={formValues.description}
-            placeholder="description"
-            onChange={handleInputChange}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            name="city"
-            value={formValues.city}
-            placeholder="City"
-            onChange={handleInputChange}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="text"
-            name="venue"
-            value={formValues.venue}
-            placeholder="Venue"
-            onChange={handleInputChange}
-          />
-        </Form.Field>
-        <Form.Field>
-          <input
-            type="date"
-            name="date"
-            value={formValues.date}
-            placeholder="Date"
-            onChange={handleInputChange}
-          />
+          {errors.title && (
+            <Message negative>
+              <p>Title is required</p>
+            </Message>
+          )}
         </Form.Field>
 
-        <Button type="submit" floated="right" positive content="Submit" />
-        <Button as={Link} to="/events" floated="right" content="Cancel" />
+        <Form.Field error={errors.category}>
+          <select
+            defaultValue={event?.category || ""}
+            {...register("category", { required: true })}
+          >
+            <option value="">Select a category</option>
+            {categoryData.map((category) => (
+              <option value={category.value} key={category.key}>
+                {category.text}
+              </option>
+            ))}
+          </select>
+          {errors.category && (
+            <Message negative>
+              <p>Category is required</p>
+            </Message>
+          )}
+        </Form.Field>
+
+        <Form.Field error={errors.description}>
+          <textarea
+            placeholder="Description"
+            defaultValue={event?.description || ""}
+            {...register("description", { required: true })}
+          />
+          {errors.description && (
+            <Message negative>
+              <p>Description is required</p>
+            </Message>
+          )}
+        </Form.Field>
+
+        <Header content="Location details" sub color="teal" />
+
+        <Form.Field error={errors.city}>
+          <input
+            placeholder="City"
+            defaultValue={event?.city || ""}
+            {...register("city", { required: true })}
+          />
+          {errors.city && (
+            <Message negative>
+              <p>City is required</p>
+            </Message>
+          )}
+        </Form.Field>
+
+        <Form.Field error={errors.venue}>
+          <input
+            placeholder="Venue"
+            defaultValue={event?.venue || ""}
+            {...register("venue", { required: true })}
+          />
+          {errors.venue && (
+            <Message negative>
+              <p>Venue is required</p>
+            </Message>
+          )}
+        </Form.Field>
+
+        <Form.Field error={errors.date}>
+          <input
+            type="date"
+            placeholder="Date"
+            defaultValue={event?.date || ""}
+            {...register("date", { required: true })}
+          />
+          {errors.date && (
+            <Message negative>
+              <p>Date is required</p>
+            </Message>
+          )}
+        </Form.Field>
+
+        <Button
+          disabled={!isValid}
+          loading={isSubmitting}
+          type="submit"
+          floated="right"
+          positive
+          content="Submit"
+        />
+        <Button
+          disabled={isSubmitting}
+          as={Link}
+          to="/events"
+          floated="right"
+          content="Cancel"
+        />
       </Form>
     </Segment>
   );
