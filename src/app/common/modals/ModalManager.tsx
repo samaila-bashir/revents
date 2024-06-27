@@ -1,9 +1,10 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import LoginForm from "../../../features/auth/LoginForm";
 
 export default function ModalManager() {
   const modalLookup = {
-    // TestModal
+    LoginForm,
   };
 
   const { type, data, open } = useSelector((state: RootState) => state.modals);

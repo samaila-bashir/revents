@@ -1,13 +1,17 @@
+import { useDispatch } from "react-redux";
 import { MenuItem, Button } from "semantic-ui-react";
+import { openModal } from "../../store/slices/modals";
+export default function SignedOutButtons() {
+  const dispatch = useDispatch();
 
-type Props = {
-  setAuth: (value: boolean) => void;
-};
-
-export default function SignedOutButtons({ setAuth }: Props) {
   return (
     <MenuItem position="right">
-      <Button onClick={() => setAuth(true)} basic inverted content="Login" />
+      <Button
+        onClick={() => dispatch(openModal({ type: "LoginForm" }))}
+        basic
+        inverted
+        content="Login"
+      />
       <Button
         basic
         inverted

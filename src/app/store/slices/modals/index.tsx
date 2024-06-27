@@ -4,7 +4,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 type State = {
   open: boolean;
   type: string | null;
-  data: any;
+  data?: any;
 };
 
 const initialState: State = {
@@ -17,7 +17,7 @@ export const modalSlice = createSlice({
   name: "modal",
   initialState,
   reducers: {
-    openModal: (state, action: PayloadAction<{ type: string; data: any }>) => {
+    openModal: (state, action: PayloadAction<{ type: string; data?: any }>) => {
       return {
         ...state,
         open: true,
