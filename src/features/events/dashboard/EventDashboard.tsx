@@ -2,14 +2,16 @@ import { Grid } from "semantic-ui-react";
 import EventList from "./EventList";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../app/store/store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "../../../app/config/firebase";
 import { AppEvent } from "../../../app/types/events";
 import { setEvents } from "../../../app/store/slices/events";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
 export default function EventDashboard() {
   const { events } = useSelector((state: RootState) => state.events);
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const q = query(collection(db, "events"));
@@ -21,13 +23,19 @@ export default function EventDashboard() {
           evts.push({ id: doc.id, ...doc.data() } as AppEvent);
         });
         dispatch(setEvents(evts));
+        setLoading(false);
       },
-      error: (err) => console.log(err),
+      error: (err) => {
+        console.log(err);
+        setLoading(false);
+      },
       complete: () => console.log("Will never be called"),
     });
 
     return () => unsubscribe();
   }, [dispatch]);
+
+  if (loading) return <LoadingComponent />;
 
   return (
     <Grid>
