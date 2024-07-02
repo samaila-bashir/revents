@@ -4,11 +4,23 @@ import SignedOutButtons from "./SignedOutButtons";
 import SignedInMenu from "./SignedInMenu";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { sampleData } from "../../api/sampleData";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../../config/firebase";
 
 export default function NavBar() {
   const authenticated = useSelector(
     (state: RootState) => state.auth.authenticated
   );
+
+  const seedData = () => {
+    sampleData.forEach(async (event) => {
+      const { id, ...rest } = event;
+      await setDoc(doc(db, "events", id), {
+        ...rest,
+      });
+    });
+  };
 
   return (
     <Menu inverted fixed="top">
@@ -28,6 +40,16 @@ export default function NavBar() {
             content="Create event"
           />
         </MenuItem>
+        {import.meta.env.DEV && (
+          <MenuItem>
+            <Button
+              inverted={true}
+              color="teal"
+              content="Seed data"
+              onClick={seedData}
+            />
+          </MenuItem>
+        )}
         {authenticated ? <SignedInMenu /> : <SignedOutButtons />}
       </Container>
     </Menu>
