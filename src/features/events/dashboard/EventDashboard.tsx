@@ -6,10 +6,10 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "../../../app/config/firebase";
 import { AppEvent } from "../../../app/types/events";
-import { setEvents } from "../../../app/store/slices/events";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
+import { actions } from "../../../app/store/slices/events";
 export default function EventDashboard() {
-  const { events } = useSelector((state: RootState) => state.events);
+  const { data: events } = useSelector((state: RootState) => state.events);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,7 @@ export default function EventDashboard() {
         querySnapshot.forEach((doc) => {
           evts.push({ id: doc.id, ...doc.data() } as AppEvent);
         });
-        dispatch(setEvents(evts));
+        dispatch(actions.success(evts));
         setLoading(false);
       },
       error: (err) => {

@@ -9,8 +9,8 @@ import {
   ActionCreatorWithOptionalPayload,
 } from "@reduxjs/toolkit";
 
-type GenericState<T> = {
-  data?: T;
+export type GenericState<T> = {
+  data: T;
   status: "loading" | "finished" | "error";
   errors?: any;
 };
