@@ -1,14 +1,21 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Form, Header, Message, Segment } from "semantic-ui-react";
 import { RootState } from "../../../app/store/store";
-import { createEvent, updateEvent } from "../../../app/store/slices/events";
-import { createId } from "@paralleldrive/cuid2";
 import { Controller, FieldValues, useForm } from "react-hook-form";
 import { categoryData } from "./categoryOptions";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { AppEvent } from "../../../app/types/events";
+import {
+  Timestamp,
+  collection,
+  doc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../../../app/config/firebase";
+import { toast } from "react-toastify";
 
 export default function EventForm() {
   const {
@@ -18,28 +25,47 @@ export default function EventForm() {
     setValue,
     formState: { errors, isValid, isSubmitting },
   } = useForm({ mode: "onTouched" });
-  const dispatch = useDispatch();
-  let { id } = useParams();
+  const { id } = useParams();
   const event = useSelector((state: RootState) =>
     state.events.events.find((e) => e.id === id)
   );
   const navigate = useNavigate();
 
-  const handleFormSubmit = (data: FieldValues) => {
-    id = id ?? createId();
-    event
-      ? dispatch(updateEvent({ ...event, ...data, date: data.date.toString() }))
-      : dispatch(
-          createEvent({
-            ...(data as AppEvent),
-            id,
-            hostedBy: "Chatto",
-            attendees: [],
-            hostPhotoURL: "",
-            date: data.date.toString(),
-          })
-        );
-    navigate(`/events/${id}`);
+  const updateEvent = async (data: AppEvent) => {
+    if (!event) return;
+    const docRef = doc(db, "events", event.id);
+    await updateDoc(docRef, {
+      ...data,
+      date: Timestamp.fromDate(data.date as unknown as Date),
+    });
+  };
+
+  const createEvent = async (data: FieldValues) => {
+    const newEventRef = doc(collection(db, "events"));
+    await setDoc(newEventRef, {
+      ...data,
+      hostedBy: "Chatto",
+      attendees: [],
+      hostPhotoURL: "",
+      date: Timestamp.fromDate(data.date as unknown as Date),
+    });
+
+    return newEventRef;
+  };
+
+  const handleFormSubmit = async (data: FieldValues) => {
+    try {
+      if (event) {
+        await updateEvent({ ...event, ...data });
+        navigate(`/events/${event.id}`);
+      } else {
+        const ref = await createEvent(data);
+        navigate(`/events/${ref.id}`);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      console.log(error);
+    }
   };
 
   return (
